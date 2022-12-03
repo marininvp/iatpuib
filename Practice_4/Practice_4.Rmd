@@ -1,0 +1,144 @@
+---
+title: "Practice_4"
+author: "vmarinin0"
+date: "2022-11-29"
+output: md_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Основы обработки данных с помощью R
+
+## Практическое задание №4
+
+### Цель работы
+
+#### 1. Закрепить практические навыки использования языка программирования R для обработки данных
+
+#### 2.Закрепить знания основных функций обработки данных экосистемы tidyverse языка R
+
+#### 3.Развить пркатические навыки использования функций обработки данных пакета dplyr -- функции select(), filter(), mutate(), arrange(), group_by()
+
+### Задание
+
+#### Проанализировать встроенные в пакет nycflights13 наборы данных с помощью языка R и ответить на вопросы:
+
+### Задание 1
+#### 1. Сколько встроенных в пакет nycflights13 датафреймов?
+
+```{r warning=FALSE, message=FALSE}
+library(nycflights13)
+library(tidyverse)
+
+#nycflights13::airlines
+#nycflights13::airports
+#nycflights13::flights
+#nycflights13::planes
+#nycflights13::weather
+5
+```
+
+### Задание 2
+#### 2. Сколько строк в каждом датафрейме?
+
+```{r}
+airlines <- nycflights13::airlines
+airports <- nycflights13::airports
+flights <- nycflights13::flights
+planes <- nycflights13::planes
+weather <- nycflights13::weather
+nrow(airlines)
+nrow(airports)
+nrow(flights)
+nrow(planes)
+nrow(weather)
+```
+
+### Задание 3
+#### 3. Сколько столбцов в каждом датафрейме?
+
+```{r}
+length(airlines)
+length(airports)
+length(flights)
+length(planes)
+length(weather)
+```
+
+### Задание 4
+#### 4. Как просмотреть примерный вид датафрейма?
+
+```{r}
+glimpse(airlines)
+```
+
+### Задание 5
+#### 5. Сколько компаний-перевозчиков (carrier) учитывают эти наборы данных (представлено в наборах данных)?
+
+```{r}
+airlines %>% nrow()
+```
+
+### Задание 6
+#### 6. Сколько рейсов принял аэропорт John F Kennedy Intl в мае?
+
+```{r}
+faa <- airports %>% filter(name == "John F Kennedy Intl") %>% select(faa) %>% paste(sep='')
+flights %>% filter(month == 5, dest == faa) %>% nrow()
+```
+
+### Задание 7
+#### 7. Какой самый северный аэропорт?
+
+```{r}
+airports %>% filter(lat == max(lat)) %>% select(name)
+```
+
+### Задание 8
+#### 8. Какой аэропорт самый высокогорный (находится выше всех над уровнем моря)?
+
+```{r}
+airports %>% filter(alt == max(alt)) %>% select(name)
+```
+
+### Задание 9
+#### 9. Какие бортовые номера у самых старых самолетов?
+
+```{r}
+planes %>% filter(year == min(year,na.rm = TRUE)) %>% select (tailnum)
+```
+
+### Задание 10
+#### 10.  Какая средняя температура воздуха была в сентябре в аэропорту John F Kennedy Intl (в градусах Цельсия).
+
+```{r}
+weather %>% filter(origin == "JFK",month == 9) %>% summarise(avg_temp = mean(5/9*(temp - 32), na.rm=TRUE))
+```
+
+### Задание 11
+#### 11.  Самолеты какой авиакомпании совершили больше всего вылетов в июне?
+
+```{r}
+carr <- flights %>% filter(month == 6) %>%
+  group_by(carrier) %>% 
+  summarise(n_flights=n()) %>% 
+  arrange(desc(n_flights)) %>%
+  head(1) %>%
+  select(carrier) %>% paste(sep='')
+airlines %>% filter(carrier == carr)
+```
+
+### Задание 12
+#### 12.  Самолеты какой авиакомпании задерживались чаще других в 2013 году?
+
+```{r}
+carr <- flights %>% filter(dep_delay != 0 | arr_delay != 0) %>%
+  group_by(carrier) %>%
+  summarise(n_flights=n()) %>%
+  arrange(desc(n_flights)) %>%
+  head(1) %>%
+  select(carrier) %>% paste(sep='')
+airlines %>% filter(carrier == carr)
+```
